@@ -1,0 +1,307 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "mode": "list",
+            "value": "gpt-4o-mini"
+          },
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.2,
+        "position": [
+          360,
+          220
+        ],
+        "id": "ac1df87c-f613-4777-b5c9-7015cc85fb30",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "IFXeFtQz2otczh6M",
+            "name": "OpenAi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "[\n  {\n  \"output\":{\n    \"category\":\"\",\n    \"priority\":\"\"\n  },\n  \"intermediateSteps\":[\n    \n  ]\n}\n]"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.2,
+        "position": [
+          660,
+          220
+        ],
+        "id": "e1ee30c1-0d82-4caf-b46d-7514825366d3",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "operation": "checkIfEvaluating"
+        },
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.6,
+        "position": [
+          800,
+          0
+        ],
+        "id": "4deef232-0b3e-4c2b-b640-74c2dcb17c2e",
+        "name": "check_type"
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1KtX8kXEQTgiJ_gdT99_2ZgpLxRHa6JoiOjxfmn8502M",
+            "mode": "list",
+            "cachedResultName": "Casos de Prueba n8n",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KtX8kXEQTgiJ_gdT99_2ZgpLxRHa6JoiOjxfmn8502M/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KtX8kXEQTgiJ_gdT99_2ZgpLxRHa6JoiOjxfmn8502M/edit#gid=0"
+          },
+          "outputs": {
+            "values": [
+              {
+                "outputName": "categoria_actual",
+                "outputValue": "={{ $json.output.Categoria }}"
+              },
+              {
+                "outputName": "prioridad_actual",
+                "outputValue": "={{ $json.output.Prioridad }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.6,
+        "position": [
+          1140,
+          0
+        ],
+        "id": "48bd8a7e-40d0-4db6-826b-64bf7d66f118",
+        "name": "set_outputs",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "dqDzLAi8uWltQgpL",
+            "name": "Google Sheets account lgiraldo1109"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "setMetrics",
+          "metrics": {
+            "assignments": [
+              {
+                "name": "categoria_match",
+                "value": "={{ $('AI Support Ticket Agent').item.json.output.Categoria == $('start_tests').item.json.categoria_esperada}}",
+                "type": "number",
+                "id": "2c6aad8b-f8a6-4136-a20f-5fc12d499f82"
+              },
+              {
+                "id": "0fe2042e-0487-435c-bc87-2c6bf0ecf4c1",
+                "name": "prioridad_match",
+                "value": "={{ $('AI Support Ticket Agent').item.json.output.Prioridad ==$('start_tests').item.json.prioridad_esperada }}",
+                "type": "number"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.6,
+        "position": [
+          1420,
+          0
+        ],
+        "id": "81eefdf3-1c38-4f65-b455-ac112a3cbf12",
+        "name": "compare_outputs"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Body:  {{ $json.chatInput }}",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "Eres un asistente que define el nivel de prioridad de un requerimiento, de entradas recibirás el texto del correo de soporte, retorna la categoría y prioridad de acuerdo a la siguiente clasificación: \n\nCategoria: \"Bug , Incidente, Requerimiento\" \nPrioridad: \"Alta, Media , Baja\"",
+            "returnIntermediateSteps": true
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ],
+        "id": "ef5ea79d-a115-4571-8217-68f6c7cd9e6e",
+        "name": "AI Support Ticket Agent"
+      },
+      {
+        "parameters": {
+          "public": true,
+          "initialMessages": "Agente de Soporte de Incidentes",
+          "options": {
+            "responseMode": "responseNode",
+            "subtitle": "",
+            "title": ""
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          60,
+          -40
+        ],
+        "id": "a2932cfe-0636-4ab1-b7f3-f27dc0c6bd86",
+        "name": "trigger_chat",
+        "webhookId": "0c0a9777-e3ff-4472-b45a-cd8ce9279db6"
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "mode": "list",
+            "value": ""
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "",
+            "mode": "list",
+            "cachedResultName": "",
+            "cachedResultUrl": ""
+          }
+        },
+        "type": "n8n-nodes-base.evaluationTrigger",
+        "typeVersion": 4.6,
+        "position": [
+          60,
+          160
+        ],
+        "id": "fa276aec-d631-46ca-a023-27a097ce8b07",
+        "name": "start_tests",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "U52DnULOL0HYh7IW",
+            "name": "Google Sheets account 2"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          1000,
+          160
+        ],
+        "id": "503f2053-ac04-45d8-9b8b-5e52b5d6f31f",
+        "name": "Respond to Webhook"
+      }
+    ],
+    "connections": {
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Support Ticket Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "AI Support Ticket Agent",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "check_type": {
+        "main": [
+          [
+            {
+              "node": "set_outputs",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "set_outputs": {
+        "main": [
+          [
+            {
+              "node": "compare_outputs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "compare_outputs": {
+        "main": [
+          []
+        ]
+      },
+      "AI Support Ticket Agent": {
+        "main": [
+          [
+            {
+              "node": "check_type",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "trigger_chat": {
+        "main": [
+          [
+            {
+              "node": "AI Support Ticket Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "start_tests": {
+        "main": [
+          [
+            {
+              "node": "AI Support Ticket Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "a92cd45d44b3a3165f4623aa7b0c56f476a66c936e92c2199094da81d4f1e74f"
+    }
+  }
